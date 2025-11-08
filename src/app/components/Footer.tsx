@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-3">À propos</h3>
             <p className="text-gray-400 text-sm mb-3">
-              SoloQ Challenge est une plateforme communautaire pour créer des mini-tournois League of Legends entre amis.
+              Ranking Challenge est une plateforme communautaire pour créer des mini-tournois League of Legends entre amis.
             </p>
             <p className="text-gray-500 text-xs">
               Projet indépendant, non affilié à Riot Games.
@@ -63,7 +63,7 @@ export default function Footer() {
 
         {/* Ligne du bas */}
         <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-          <p>&copy; 2025 SoloQ Challenge. Tous droits réservés.</p>
+          <p>&copy; 2025 Ranking Challenge. Tous droits réservés.</p>
           <p className="mt-3 md:mt-0">
             Projet communautaire • Non affilié à Riot Games
           </p>

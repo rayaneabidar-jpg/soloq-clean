@@ -23,7 +23,7 @@ export default function Header() {
     <header className="bg-gray-800 border-b border-gray-700 p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-white">
-          🎮 SoloQ Challenge
+          🎮 Ranking Challenge
         </Link>
 
         <nav className="flex gap-4 items-center">

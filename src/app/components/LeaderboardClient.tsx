@@ -244,7 +244,7 @@ export default function LeaderboardClient({ id }: { id: string }) {
 
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 shadow-lg">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-white">SoloQ Challenge</h1>
+          <h1 className="text-2xl font-bold text-white">Ranking Challenge</h1>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm text-gray-300">
               <input

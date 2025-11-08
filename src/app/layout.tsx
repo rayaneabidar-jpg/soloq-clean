@@ -4,8 +4,8 @@ import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 
 export const metadata: Metadata = {
-  title: "SoloQ Challenge",
-  description: "Community SoloQ challenge tracker",
+  title: "Ranking Challenge",
+  description: "Community Ranking challenge tracker",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
