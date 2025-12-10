@@ -3,10 +3,13 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { fetchRankedSoloSnapshot, getPuuidByRiotId, getPuuidBySummoner } from "@/lib/riot";
 
+
 export const runtime = "nodejs";
+
 
 // Rate limiter simple en mémoire (reset toutes les 10s)
 const rateLimitMap = new Map<string, number>();
+
 
 function riotRateLimit(key: string): boolean {
   const now = Date.now();
@@ -28,13 +31,23 @@ function riotRateLimit(key: string): boolean {
   return true;
 }
 
-export async function POST(req: Request) {
+
+// ✅ Fonction partagée pour le sync
+async function syncChallenges(req: Request) {
   try {
-    // ✅ Vérifier header cron (Vercel utilise X-Vercel-Cron)
+    // ✅ Vérifier query param apiKey (pour EasyCron)
+    const url = new URL(req.url);
+    const apiKey = url.searchParams.get("apiKey");
+    
+    // Accepter soit le header Vercel, soit le query param EasyCron
     const cronSecret = req.headers.get("authorization");
-    if (process.env.CRON_SECRET && cronSecret !== `Bearer ${process.env.CRON_SECRET}`) {
+    const isValidVercel = process.env.CRON_SECRET && cronSecret === `Bearer ${process.env.CRON_SECRET}`;
+    const isValidEasyCron = process.env.CRON_SECRET && apiKey === process.env.CRON_SECRET;
+    
+    if (!isValidVercel && !isValidEasyCron) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
 
     console.log("🔄 [CRON] Sync started...");
     
@@ -45,13 +58,16 @@ export async function POST(req: Request) {
       .lte("start_at", new Date().toISOString())
       .or(`end_at.is.null,end_at.gte.${new Date().toISOString()}`);
 
+
     if (chalErr) {
       console.error("❌ Error fetching challenges:", chalErr);
       return NextResponse.json({ error: chalErr.message }, { status: 500 });
     }
 
+
     let totalInserted = 0;
     let totalErrors = 0;
+
 
     // 2️⃣ Pour chaque challenge actif
     for (const challenge of challenges || []) {
@@ -63,7 +79,9 @@ export async function POST(req: Request) {
           .eq("challenge_id", challenge.id)
           .eq("active", true);
 
+
         if (playErr) throw playErr;
+
 
         // Syncer chaque joueur
         for (const player of players || []) {
@@ -73,6 +91,7 @@ export async function POST(req: Request) {
               await new Promise(resolve => setTimeout(resolve, 150));
             }
 
+
             // Récupérer le snapshot actuel
             const snapshot = await fetchRankedSoloSnapshot(player.region as any, player.puuid);
             
@@ -80,6 +99,7 @@ export async function POST(req: Request) {
               console.log(`⚠️ [CRON] No rank for ${player.name}`);
               continue;
             }
+
 
             // Insérer le snapshot
             const { error: snapErr } = await supabaseAdmin
@@ -96,6 +116,7 @@ export async function POST(req: Request) {
                 { onConflict: "player_id,challenge_id,timestamp" }
               );
 
+
             if (snapErr && snapErr.code !== "23505") throw snapErr;
             totalInserted++;
           } catch (e: any) {
@@ -109,6 +130,7 @@ export async function POST(req: Request) {
       }
     }
 
+
     console.log(`✅ [CRON] Completed: ${totalInserted} inserted, ${totalErrors} errors`);
     return NextResponse.json({ 
       success: true, 
@@ -120,4 +142,13 @@ export async function POST(req: Request) {
     console.error("❌ [CRON] Fatal error:", e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
+}
+
+// ✅ Accepter GET et POST
+export async function GET(req: Request) {
+  return syncChallenges(req);
+}
+
+export async function POST(req: Request) {
+  return syncChallenges(req);
 }
