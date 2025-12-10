@@ -23,9 +23,8 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/login`,
-      },
+      // Pas de logique d'emailRedirectTo nécessaire tant qu'on ne fait
+      // pas de vraie vérification d'email
     });
 
     setIsLoading(false);
@@ -36,10 +35,10 @@ export default function SignupPage() {
     }
 
     setSuccessMsg(
-      "Compte créé. Vérifiez votre boîte mail pour confirmer votre inscription."
+      "Compte créé. Cette version est en phase de test : aucune vérification par e-mail n'est nécessaire. Vous pouvez vous connecter dès maintenant."
     );
     // Optionnel : redirection après quelques secondes
-    // setTimeout(() => router.push("/auth/login"), 3000);
+    // setTimeout(() => router.push("/auth/login"), 2000);
   };
 
   return (
@@ -81,6 +80,12 @@ export default function SignupPage() {
               Minimum 6 caractères.
             </p>
           </div>
+
+          <p className="mt-1 text-xs text-slate-400">
+            Cette version est actuellement en phase de test. La vérification par
+            e-mail n'est pas encore activée : vous pourrez vous connecter
+            directement après la création de votre compte.
+          </p>
 
           {errorMsg && (
             <p className="text-sm text-red-400">
