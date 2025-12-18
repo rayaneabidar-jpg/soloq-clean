@@ -1,72 +1,66 @@
 import Link from "next/link";
+import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-12">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
-          {/* Colonne 1: À propos */}
-          <div>
-            <h3 className="text-white font-semibold mb-3">À propos</h3>
-            <p className="text-gray-400 text-sm mb-3">
-              Ranking Challenge est une plateforme communautaire pour créer des mini-tournois League of Legends entre amis.
+    <footer className="bg-background py-16 mt-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          {/* Logo & Description */}
+          <div className="col-span-1 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 bg-yellow-400 rounded-sm flex items-center justify-center">
+                <span className="text-black font-bold text-sm">K</span>
+              </div>
+            </Link>
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              Lorem Ipsum is simply dummy text of the printing and typesetting industry.
             </p>
-            <p className="text-gray-500 text-xs">
-              Projet indépendant, non affilié à Riot Games.
-            </p>
+            <p className="text-gray-400 text-sm">@Lorem</p>
           </div>
 
-          {/* Colonne 2: Navigation */}
+          {/* About us */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Navigation</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/challenges" className="text-gray-400 hover:text-blue-400">
-                  Mes Challenges
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-blue-400">
-                  À propos
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-blue-400">
-                  Confidentialité
-                </Link>
-              </li>
+            <h3 className="text-white font-semibold mb-4">About us</h3>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><Link href="#" className="hover:text-white">Zeux</Link></li>
+              <li><Link href="#" className="hover:text-white">Portfolio</Link></li>
+              <li><Link href="#" className="hover:text-white">Careers</Link></li>
+              <li><Link href="#" className="hover:text-white">Contact us</Link></li>
             </ul>
           </div>
 
-          {/* Colonne 3: Légal */}
+          {/* Contact us */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Légal</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-blue-400">
-                  Politique de confidentialité
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-gray-400 hover:text-blue-400">
-                  Conditions d'utilisation
-                </Link>
-              </li>
-              <li>
-                <a href="mailto:contact@example.com" className="text-gray-400 hover:text-blue-400">
-                  Contact
-                </a>
-              </li>
-            </ul>
+            <h3 className="text-white font-semibold mb-4">Contact us</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+            </p>
+            <p className="text-gray-400 text-sm">+908 89097 890</p>
+          </div>
+
+          {/* Socials (aligned to bottom right in grid usually, but here just in the flow) */}
+          <div className="flex items-end justify-end md:col-start-4">
+            <div className="flex gap-4">
+              <Link href="#" className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:bg-gray-200">
+                <Facebook size={16} />
+              </Link>
+              <Link href="#" className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:bg-gray-200">
+                <Instagram size={16} />
+              </Link>
+              <Link href="#" className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:bg-gray-200">
+                <Twitter size={16} />
+              </Link>
+              <Link href="#" className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:bg-gray-200">
+                <Linkedin size={16} />
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Ligne du bas */}
-        <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-          <p>&copy; 2025 Ranking Challenge. Tous droits réservés.</p>
-          <p className="mt-3 md:mt-0">
-            Projet communautaire • Non affilié à Riot Games
-          </p>
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-center items-center text-xs text-gray-600">
+          <p>Copyright ® 2025 Ranking Challenge All rights Reserved</p>
         </div>
       </div>
     </footer>

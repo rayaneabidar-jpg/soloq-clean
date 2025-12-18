@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import "./globals.css";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import { Analytics } from "@vercel/analytics/next"
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Ranking Challenge",
-  description: "Community Ranking challenge tracker",
+  description: "Organisez, rejoignez et suivez vos challenges",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body suppressHydrationWarning className="min-h-screen bg-neutral-950 text-neutral-100">
+    <html lang="fr" className={poppins.variable}>
+      <body className="antialiased font-sans flex flex-col min-h-screen">
         <Header />
-        {children}
-        <Footer /> 
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24 py-12">
+          {children}
+        </main>
+        <Footer />
+        <Analytics />
       </body>
     </html>
   );
-
 }

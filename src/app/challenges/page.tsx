@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { Button } from "@/app/components/ui/Button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/Card";
+import { ArrowUpDown, Trash2, User, Trophy } from "lucide-react";
 
 type Challenge = {
   id: string;
@@ -45,55 +48,98 @@ export default function ChallengesPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+      <div className="flex justify-center items-center min-h-screen bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-gray-900 min-h-screen text-white">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Challenges</h1>
-        {user && (
-          <button
-            onClick={() => router.push("/challenges/new")}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 font-semibold"
-          >
-            Créer un challenge
-          </button>
-        )}
+    <div className="w-full">
+      <div className="flex justify-between items-end mb-8 mt-4 pb-6">
+        <h1 className="text-4xl font-bold text-white">Listes des challenges :</h1>
+
+        <div className="flex gap-4">
+          <Button variant="ghost" size="icon" className="border border-white/10 text-white/50 hover:text-white">
+            <ArrowUpDown size={18} />
+          </Button>
+        </div>
       </div>
 
       {challenges.length === 0 ? (
-        <div className="text-center text-gray-400">
-          <p className="text-lg">Aucun challenge disponible</p>
+        <div className="text-center py-20 bg-[#1a1a1a]/50 rounded-xl border border-dashed border-white/10">
+          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-white/20">
+            <Trophy size={32} />
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-2">Aucun challenge trouvé</h3>
+          <p className="text-white/50 mb-6 max-w-md mx-auto text-sm">Il n'y a pas encore de challenge actif.</p>
+          {user && (
+            <Link href="/challenges/new">
+              <Button variant="gold" size="lg" className="px-8 text-base">Créer un challenge</Button>
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {challenges.map((challenge) => (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {challenges.map((challenge, index) => (
             <div
               key={challenge.id}
-              className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition-all cursor-pointer"
-              onClick={() => router.push(`/challenges/${challenge.id}`)}
+              className="relative group h-full"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <h2 className="text-xl font-bold mb-2">{challenge.name}</h2>
-              <div className="space-y-2 text-sm text-gray-300 mb-4">
-                <p>Mode: {challenge.mode}</p>
-                <p>Ranking: {challenge.ranking_rule}</p>
-                <p>
-                  Visibilité:{" "}
-                  <span className="text-blue-400">{challenge.visibility}</span>
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Link
-                  href={`/challenges/${challenge.id}`}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 text-center text-sm"
-                >
-                  Ouvrir
-                </Link>
-              </div>
+              {/* Main Card Link - z-10 to be on top of background but below interactive buttons */}
+              <Link href={`/challenges/${challenge.id}`} className="absolute inset-0 z-10 rounded-xl" />
+
+              {/* Card - Content needs to be z-0 or z-20 depending on interactivity */}
+              <Card className="h-full bg-[#1a1a1a] border border-white/5 group-hover:border-white/20 group-hover:bg-[#202020] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:shadow-black/50 group-hover:-translate-y-1 p-5 flex flex-col justify-between relative z-0">
+                <div>
+                  <div className="flex flex-row items-start justify-between mb-4 relative z-20">
+                    <h3 className="text-lg font-bold text-white leading-tight pr-2 group-hover:text-[var(--color-green-start)] transition-colors pointer-events-none">
+                      {challenge.name}
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Delete logic
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-white/50 mb-6 font-light pointer-events-none">
+                    <div className="flex items-center justify-between">
+                      <span>Période :</span>
+                      <span className="text-white">12/11 - 12/12</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Mode :</span>
+                      <span className="text-white uppercase font-medium bg-white/5 px-2 py-0.5 rounded text-xs">{challenge.mode}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 mt-auto border-t border-white/5 pt-4 pointer-events-none">
+                  <div className="flex -space-x-1.5">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-6 h-6 rounded-full bg-[#333] border border-[#1a1a1a] flex items-center justify-center text-[9px] text-white">
+                        <User size={12} />
+                      </div>
+                    ))}
+                    <div className="w-6 h-6 rounded-full bg-[#222] border border-[#1a1a1a] flex items-center justify-center text-[9px] text-white">
+                      +
+                    </div>
+                  </div>
+
+                  <Button variant="ghost" size="sm" className="text-white/50 group-hover:text-white rounded-full px-4 text-xs border border-white/10 bg-transparent group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300">
+                    Ouvrir
+                  </Button>
+                </div>
+              </Card>
             </div>
           ))}
         </div>
