@@ -80,7 +80,7 @@ export default function ChallengesPage() {
           )}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {challenges.map((challenge, index) => (
             <div
               key={challenge.id}
@@ -90,25 +90,53 @@ export default function ChallengesPage() {
               {/* Main Card Link - z-10 to be on top of background but below interactive buttons */}
               <Link href={`/challenges/${challenge.id}`} className="absolute inset-0 z-10 rounded-xl" />
 
+              {/* Delete Button - z-20 to be on top of Link */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-5 right-5 z-20 h-8 px-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (!confirm("Voulez-vous vraiment supprimer ce challenge ?")) return;
+
+                  try {
+                    const { data: sessionData } = await supabase.auth.getSession();
+                    const token = sessionData.session?.access_token;
+                    if (!token) {
+                      alert("Vous devez être connecté");
+                      return;
+                    }
+
+                    const res = await fetch(`/api/challenges/${challenge.id}`, {
+                      method: "DELETE",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    });
+
+                    if (!res.ok) {
+                      const json = await res.json();
+                      throw new Error(json.error || "Erreur lors de la suppression");
+                    }
+
+                    setChallenges((prev) => prev.filter((c) => c.id !== challenge.id));
+                  } catch (err: any) {
+                    alert("Erreur: " + err.message);
+                  }
+                }}
+              >
+                <Trash2 size={16} />
+              </Button>
+
               {/* Card - Content needs to be z-0 or z-20 depending on interactivity */}
-              <Card className="h-full bg-[#1a1a1a] border border-white/5 group-hover:border-white/20 group-hover:bg-[#202020] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:shadow-black/50 group-hover:-translate-y-1 p-5 flex flex-col justify-between relative z-0">
+              <Card className="h-full bg-[#1a1a1a] border border-white/5 group-hover:border-white/20 group-hover:bg-[#202020] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:shadow-black/50 p-5 flex flex-col justify-between relative z-0">
                 <div>
-                  <div className="flex flex-row items-start justify-between mb-4 relative z-20">
-                    <h3 className="text-lg font-bold text-white leading-tight pr-2 group-hover:text-[var(--color-green-start)] transition-colors pointer-events-none">
+                  <div className="flex flex-row items-start justify-between mb-4 relative z-0">
+                    <h3 className="text-lg font-bold text-white leading-tight pr-8 group-hover:text-[var(--color-green-start)] transition-colors pointer-events-none">
                       {challenge.name}
                     </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Delete logic
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
                   </div>
 
                   <div className="space-y-2 text-sm text-white/50 mb-6 font-light pointer-events-none">

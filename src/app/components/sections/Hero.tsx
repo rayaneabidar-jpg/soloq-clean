@@ -17,12 +17,12 @@ export function Hero() {
     }, []);
 
     return (
-        <section className="flex flex-col items-center text-center mb-24 pt-24 animate-in fade-in slide-in-from-bottom-8 duration-700 max-w-4xl mx-auto">
-            <h1 className="text-white text-4xl md:text-6xl font-bold mb-6 tracking-tight drop-shadow-sm">
+        <section className="flex flex-col items-center text-center mb-12 pt-12 md:mb-24 md:pt-24 animate-in fade-in slide-in-from-bottom-8 duration-700 max-w-4xl mx-auto px-4">
+            <h1 className="text-white text-3xl md:text-6xl font-bold mb-6 tracking-tight drop-shadow-sm leading-tight">
                 Ranking Challenge
             </h1>
 
-            <div className="flex flex-col gap-2 mb-10 min-h-[80px]">
+            <div className="flex flex-col gap-2 mb-8 md:mb-10 min-h-[80px]">
                 <TypingText
                     text="Organisez, rejoignez et suivez vos challenges"
                     delay={0}
@@ -35,16 +35,16 @@ export function Hero() {
                 />
             </div>
 
-            <div className="flex gap-4">
-                <Link href="/challenges/new">
-                    <Button variant="gold" size="lg" className="rounded-xl px-10 h-14 text-lg shadow-[0_0_20px_rgba(255,249,61,0.2)] hover:shadow-[0_0_25px_rgba(255,249,61,0.4)] transition-all">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <Link href="/challenges/new" className="w-full sm:w-auto">
+                    <Button variant="gold" size="lg" className="w-full sm:w-auto rounded-xl px-10 h-12 md:h-14 text-base md:text-lg shadow-[0_0_20px_rgba(255,249,61,0.2)] hover:shadow-[0_0_25px_rgba(255,249,61,0.4)] transition-all">
                         Créer un challenge
                     </Button>
                 </Link>
 
                 {!user && (
-                    <Link href="/auth/login">
-                        <Button variant="green" size="lg" className="rounded-xl px-10 h-14 text-lg shadow-[0_0_20px_rgba(35,122,87,0.3)] hover:shadow-[0_0_25px_rgba(35,122,87,0.5)] transition-all">
+                    <Link href="/auth/login" className="w-full sm:w-auto">
+                        <Button variant="green" size="lg" className="w-full sm:w-auto rounded-xl px-10 h-12 md:h-14 text-base md:text-lg shadow-[0_0_20px_rgba(35,122,87,0.3)] hover:shadow-[0_0_25px_rgba(35,122,87,0.5)] transition-all">
                             Connexion
                         </Button>
                     </Link>

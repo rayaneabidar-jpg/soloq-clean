@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/app/components/ui/Button";
 import { Input } from "@/app/components/ui/Input";
-import { Search, RefreshCcw, ArrowLeft, Settings, XCircle } from "lucide-react";
+import { Search, RefreshCcw, ArrowLeft, Settings, XCircle, Trash2 } from "lucide-react";
 
 type Row = {
   playerId: string;
@@ -34,7 +34,7 @@ function Spinner() {
   );
 }
 
-export default function LeaderboardClient({ id, challengeName, onSettingsClick }: { id: string, challengeName?: string, onSettingsClick?: () => void }) {
+export default function LeaderboardClient({ id, challengeName, onSettingsClick, onDeleteClick }: { id: string, challengeName?: string, onSettingsClick?: () => void, onDeleteClick?: () => void }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -246,115 +246,104 @@ export default function LeaderboardClient({ id, challengeName, onSettingsClick }
       )}
 
       {/* Header Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <h1 className="text-3xl font-bold text-white tracking-tight">{challengeName ? `${challengeName} :` : "Challenge :"}</h1>
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight break-words max-w-full">
+          {challengeName ? `${challengeName}` : "Challenge"}
+        </h1>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
+          <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={16} />
             <Input
-              placeholder="Rechercher un joueur"
-              className="pl-10 bg-[#1a1a1a] border-[#333] focus:border-[var(--color-green-start)]"
+              placeholder="Rechercher..."
+              className="pl-10 bg-[#1a1a1a] border-[#333] focus:border-[var(--color-green-start)] w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <form onSubmit={handleAddPlayer} className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={addingPlayer}
-              variant="green"
-              className="h-12 px-6 rounded-xl"
-            >
-              {addingPlayer ? "..." : "Ajouter"}
-            </Button>
-            <Input
-              placeholder="Pseudo#Tag"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="bg-[#1a1a1a] border-[#333] w-40 hidden"
-              disabled={addingPlayer}
-            />
-            {/* Note: In the design "Ajouter" is a button next to search? Or is the search bar strictly for filtering and there's a separate add input? 
-                 The design shows "Rechercher un joueur" input and "Ajouter" button.
-                 I'll assume the input next to "Ajouter" logic is hidden or integrated. 
-                 Wait, the design (Image 0) shows "Rechercher un joueur" [Ajouter] button. 
-                 It implies the search bar MIGHT be the input for adding ?? Or search is for filtering the list.
-                 Usually "Rechercher" filters, and there is a separate "Ajouter" flow.
-                 However, in the previous code, there was a separate input for Adding.
-                 I'll keep the Add input but maybe style it better or put it in a modal if I want to match the "clean" header. 
-                 But to respect "Same functionality", I must keep the input visible if it's the only way to add.
-                 In the previous code: Input (Pseudo#Tag) + Button (Ajouter).
-                 I will keep it but style it nicely.
-             */}
-          </form>
-          {/* Re-adding the input for "Ajouter" properly */}
-          <form onSubmit={handleAddPlayer} className="flex gap-2 items-center">
-            <Input
-              placeholder="Pseudo#Tag"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="bg-[#1a1a1a] h-12 w-40 border border-white/10"
-            />
-            <Button variant="green" type="submit" disabled={addingPlayer} className="h-12">
-              Ajouter
-            </Button>
-          </form>
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <form onSubmit={handleAddPlayer} className="flex gap-2 items-center w-full sm:w-auto">
+              <Input
+                placeholder="Pseudo#Tag"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                className="bg-[#1a1a1a] h-12 w-full sm:w-40 border border-white/10"
+              />
+              <Button variant="green" type="submit" disabled={addingPlayer} className="h-12 px-6 shrink-0">
+                Ajouter
+              </Button>
+            </form>
 
-          <Button variant="ghost" onClick={() => syncMatches()} disabled={updating} className="h-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5">
-            {updating ? <RefreshCcw className="animate-spin" size={16} /> : "Rafraîchir"}
-          </Button>
+            <div className="flex gap-2 w-full sm:w-auto justify-end">
+              <Button variant="ghost" onClick={() => syncMatches()} disabled={updating} className="h-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5 flex-1 sm:flex-none">
+                {updating ? <RefreshCcw className="animate-spin" size={16} /> : <RefreshCcw size={16} />}
+              </Button>
 
-          <Button variant="ghost" onClick={() => router.push("/challenges")} className="h-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5">
-            Retour
-          </Button>
+              <Button variant="ghost" onClick={() => router.push("/challenges")} className="h-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5 flex-1 sm:flex-none">
+                <ArrowLeft size={16} />
+              </Button>
 
-          <Button variant="ghost" size="icon" className="h-12 w-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5 rounded-xl" onClick={onSettingsClick}>
-            <Settings size={20} />
-          </Button>
+              <Button variant="ghost" size="icon" className="h-12 w-12 text-white/50 hover:text-white bg-[#1a1a1a] border border-white/5 rounded-xl shrink-0" onClick={onSettingsClick}>
+                <Settings size={20} />
+              </Button>
+
+              {onDeleteClick && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 text-red-500 bg-red-500/5 border border-red-500/10 hover:bg-red-500/20 hover:border-red-500/30 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.1)] hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] shrink-0"
+                  onClick={onDeleteClick}
+                >
+                  <Trash2 size={20} />
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Leaderboard Table */}
       <div className="bg-[#1a1a1a] rounded-xl border border-white/5 overflow-hidden shadow-2xl">
-        <div className="grid grid-cols-12 bg-gradient-to-b from-[var(--color-green-start)] to-[var(--color-green-end)] px-6 py-3 text-sm font-normal text-white border-b border-white/10">
-          <div className="col-span-1 text-center">#</div>
-          <div className="col-span-3">Joueur</div>
-          <div className="col-span-3">Rank Initial</div>
-          <div className="col-span-1 text-center">Victoires</div>
-          <div className="col-span-1 text-center">Défaites</div>
-          <div className="col-span-1 text-center">Lp gagnés</div>
-          <div className="col-span-2 text-right">Rank</div>
+        <div className="grid grid-cols-12 bg-gradient-to-b from-[var(--color-green-start)] to-[var(--color-green-end)] px-4 md:px-6 py-3 text-xs md:text-sm font-normal text-white border-b border-white/10">
+          <div className="col-span-2 sm:col-span-1 text-center">#</div>
+          <div className="col-span-6 sm:col-span-6 md:col-span-3">Joueur</div>
+          <div className="hidden md:block md:col-span-3">Rank Initial</div>
+          <div className="hidden sm:block sm:col-span-1 text-center">V</div>
+          <div className="hidden sm:block sm:col-span-1 text-center">D</div>
+          <div className="col-span-2 sm:col-span-1 text-center">LP</div>
+          <div className="col-span-2 sm:col-span-2 text-right">Rank</div>
         </div>
 
         {filteredRows.length > 0 ? (
           <div className="divide-y divide-white/5 bg-[#111111]">
             {filteredRows.map((r, index) => (
-              <div key={r.playerId} className="grid grid-cols-12 px-6 py-3 text-sm items-center hover:bg-white/5 transition-colors group">
-                <div className="col-span-1 text-center">
+              <div key={r.playerId} className="grid grid-cols-12 px-4 md:px-6 py-3 text-xs md:text-sm items-center hover:bg-white/5 transition-colors group">
+                <div className="col-span-2 sm:col-span-1 text-center">
                   <span className={`inline-flex items-center justify-center text-[#00D1FF] font-medium`}>
                     {index + 1}
                   </span>
                 </div>
-                <div className="col-span-3 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#2a2a2a] rounded-full flex-shrink-0 border border-white/10"></div>
-                  <div className="overflow-hidden">
-                    <div className="font-medium text-white truncate text-sm">{r.name}</div>
-                    <div className="text-[10px] text-white/40 truncate">{r.team || "Sans équipe"}</div>
+                <div className="col-span-6 sm:col-span-6 md:col-span-3 flex items-center gap-2 md:gap-3">
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-[#2a2a2a] rounded-full flex-shrink-0 border border-white/10"></div>
+                  <div className="overflow-hidden min-w-0">
+                    <div className="font-medium text-white truncate">{r.name}</div>
+                    <div className="text-[10px] text-white/40 truncate hidden sm:block">{r.team || "Sans équipe"}</div>
                   </div>
                 </div>
-                <div className="col-span-3 text-white/70 font-light">{r.mainRank}</div>
-                <div className="col-span-1 text-center text-white/70">{r.wins}</div>
-                <div className="col-span-1 text-center text-white/70">{r.losses}</div>
-                <div className="col-span-1 text-center text-white/70">{r.lpGained}</div>
-                <div className="col-span-2 flex items-center justify-end gap-4">
-                  <span className="text-white/70 text-right font-light">{r.rankLabel || "Unranked"}</span>
+                <div className="hidden md:block md:col-span-3 text-white/70 font-light truncate">{r.mainRank}</div>
+                <div className="hidden sm:block sm:col-span-1 text-center text-white/70">{r.wins}</div>
+                <div className="hidden sm:block sm:col-span-1 text-center text-white/70">{r.losses}</div>
+                <div className="col-span-2 sm:col-span-1 text-center text-green-400 font-medium">+{r.lpGained}</div>
+                <div className="col-span-2 sm:col-span-2 flex items-center justify-end gap-2 md:gap-4 ml-auto">
+                  <div className="text-right">
+                    <span className="text-white/90 block font-medium truncate max-w-[80px] sm:max-w-none">{r.rankLabel || "Unranked"}</span>
+                  </div>
                   <button
                     onClick={() => handleRemovePlayer(r.playerId)}
-                    className="text-white/30 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                    className="text-white/30 hover:text-red-500 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1"
                   >
-                    <XCircle size={16} />
+                    <XCircle size={14} className="md:w-4 md:h-4" />
                   </button>
                 </div>
               </div>

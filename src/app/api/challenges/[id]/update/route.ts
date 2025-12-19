@@ -27,9 +27,26 @@ export async function PUT(
 
     const body = await req.json();
 
+    // Extract allowed fields
+    const { name, visibility, start_at, end_at } = body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (visibility !== undefined) updates.visibility = visibility;
+    if (start_at !== undefined) updates.start_at = start_at;
+    if (end_at !== undefined) updates.end_at = end_at;
+
+    // Validate dates if both are present or being updated
+    // Note: This is a basic check. Ideal would be fetching current if one is missing, but for now we assume simple updates.
+    if (updates.start_at && updates.end_at) {
+      if (new Date(updates.start_at) >= new Date(updates.end_at)) {
+        return NextResponse.json({ error: "End date must be after start date" }, { status: 400 });
+      }
+    }
+
     const { data: updated, error } = await supabaseAdmin
       .from("challenges")
-      .update(body)
+      .update(updates)
       .eq("id", id)
       .select()
       .single();

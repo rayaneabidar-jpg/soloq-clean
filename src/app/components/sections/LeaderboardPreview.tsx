@@ -23,14 +23,14 @@ export function LeaderboardPreview() {
 
             <div className="flex flex-col w-full rounded-lg overflow-hidden shadow-2xl bg-[#1a1a1a] border border-white/5">
                 {/* Header */}
-                <div className="grid grid-cols-[60px_2fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center gap-4 px-6 py-3 bg-gradient-to-b from-[var(--color-green-start)] to-[var(--color-green-end)] border-b border-white/5">
+                <div className="grid grid-cols-[50px_1fr_1fr] md:grid-cols-[60px_2fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center gap-4 px-4 md:px-6 py-3 bg-gradient-to-b from-[var(--color-green-start)] to-[var(--color-green-end)] border-b border-white/5">
                     <div className="text-sm text-center font-normal text-white/90">#</div>
                     <div className="text-sm font-normal text-white/90">Joueur</div>
-                    <div className="text-sm font-normal text-white/90">Rank initial</div>
-                    <div className="text-sm text-center font-normal text-white/90">Victoires</div>
-                    <div className="text-sm text-center font-normal text-white/90">Défaites</div>
-                    <div className="text-sm text-center font-normal text-white/90">Lp gagnés</div>
-                    <div className="text-sm font-normal text-white/90">Rank</div>
+                    <div className="hidden md:block text-sm font-normal text-white/90">Rank initial</div>
+                    <div className="hidden md:block text-sm text-center font-normal text-white/90">Victoires</div>
+                    <div className="hidden md:block text-sm text-center font-normal text-white/90">Défaites</div>
+                    <div className="hidden md:block text-sm text-center font-normal text-white/90">Lp gagnés</div>
+                    <div className="text-sm font-normal text-white/90 text-right md:text-left">Rank</div>
                 </div>
 
                 {/* Rows with Fade Mask */}
@@ -41,7 +41,7 @@ export function LeaderboardPreview() {
                     {leaderboardData.map((entry, index) => (
                         <div
                             key={index}
-                            className="grid grid-cols-[60px_2fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center gap-4 px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-default"
+                            className="grid grid-cols-[50px_1fr_1fr] md:grid-cols-[60px_2fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center gap-4 px-4 md:px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-default"
                         >
                             <div className="flex items-center justify-center">
                                 <span className="text-[#00D1FF] text-xs font-medium">
@@ -51,31 +51,31 @@ export function LeaderboardPreview() {
 
                             <div className="flex items-center gap-4">
                                 {/* Avatar Placeholder */}
-                                <div className="w-10 h-10 border border-white/10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white/50 text-xs">
+                                <div className="w-8 h-8 md:w-10 md:h-10 border border-white/10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white/50 text-xs shrink-0">
                                 </div>
-                                <div className="flex flex-col">
-                                    <div className="text-white text-sm font-medium">
+                                <div className="flex flex-col min-w-0">
+                                    <div className="text-white text-sm font-medium truncate">
                                         {entry.player.name}
                                     </div>
-                                    <div className="text-white/40 text-[10px]">
+                                    <div className="text-white/40 text-[10px] truncate">
                                         {entry.player.team}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="text-white/70 text-sm font-normal">
+                            <div className="hidden md:block text-white/70 text-sm font-normal">
                                 {entry.initialRank}
                             </div>
-                            <div className="text-white/70 text-sm font-normal text-center">
+                            <div className="hidden md:block text-white/70 text-sm font-normal text-center">
                                 {entry.wins}
                             </div>
-                            <div className="text-white/70 text-sm font-normal text-center">
+                            <div className="hidden md:block text-white/70 text-sm font-normal text-center">
                                 {entry.losses}
                             </div>
-                            <div className="text-white/70 text-sm font-normal text-center">
+                            <div className="hidden md:block text-white/70 text-sm font-normal text-center">
                                 {entry.lpGained}
                             </div>
-                            <div className="text-white/70 text-sm font-normal">
+                            <div className="text-white/70 text-sm font-normal text-right md:text-left truncate">
                                 {entry.currentRank}
                             </div>
                         </div>

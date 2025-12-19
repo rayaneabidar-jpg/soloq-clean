@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
 export default function Footer() {
@@ -9,8 +10,8 @@ export default function Footer() {
           {/* Logo & Description */}
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 bg-yellow-400 rounded-sm flex items-center justify-center">
-                <span className="text-black font-bold text-sm">K</span>
+              <div className="w-8 h-8 flex items-center justify-center">
+                <Image src="/icons/logo.svg" alt="Ranking Challenge" width={32} height={32} />
               </div>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-4">

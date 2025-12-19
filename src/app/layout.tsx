@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="fr" className={poppins.variable}>
       <body className="antialiased font-sans flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 w-full max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-24 py-12">
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-12 lg:px-12 xl:px-24 py-8 md:py-12">
           {children}
         </main>
         <Footer />
