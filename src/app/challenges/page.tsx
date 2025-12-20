@@ -6,7 +6,14 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { Button } from "@/app/components/ui/Button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/Card";
-import { ArrowUpDown, Trash2, User, Trophy } from "lucide-react";
+import { ArrowUpDown, Trash2, User, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { getDisplayNameFromRiotId } from "@/lib/utils";
+
+type PlayerSummary = {
+  id: string;
+  name: string;
+  profile_icon_id: number | null;
+};
 
 type Challenge = {
   id: string;
@@ -18,6 +25,7 @@ type Challenge = {
   ranking_rule: string;
   owner_id: string;
   created_at: string;
+  players: PlayerSummary[];
 };
 
 export default function ChallengesPage() {
@@ -25,6 +33,19 @@ export default function ChallengesPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [expandedChallenges, setExpandedChallenges] = useState<Set<string>>(new Set());
+  const [ddragonVersion, setDdragonVersion] = useState("14.24.1");
+
+  useEffect(() => {
+    fetch("https://ddragon.leagueoflegends.com/api/versions.json")
+      .then(r => r.json())
+      .then(versions => {
+        if (versions && versions.length > 0) {
+          setDdragonVersion(versions[0]);
+        }
+      })
+      .catch(e => console.error("Failed to fetch ddragon version", e));
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -131,8 +152,8 @@ export default function ChallengesPage() {
               </Button>
 
               {/* Card - Content needs to be z-0 or z-20 depending on interactivity */}
-              <Card className="h-full bg-[#1a1a1a] border border-white/5 group-hover:border-white/20 group-hover:bg-[#202020] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:shadow-black/50 p-5 flex flex-col justify-between relative z-0">
-                <div>
+              <Card className={`h-full bg-[#1a1a1a] border border-white/5 group-hover:border-white/20 group-hover:bg-[#202020] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:shadow-black/50 p-5 flex flex-col justify-between relative z-0 ${expandedChallenges.has(challenge.id) ? 'bg-[#202020] border-white/20' : ''}`}>
+                <div className="flex-1">
                   <div className="flex flex-row items-start justify-between mb-4 relative z-0">
                     <h3 className="text-lg font-bold text-white leading-tight pr-8 group-hover:text-[var(--color-green-start)] transition-colors pointer-events-none">
                       {challenge.name}
@@ -142,7 +163,10 @@ export default function ChallengesPage() {
                   <div className="space-y-2 text-sm text-white/50 mb-6 font-light pointer-events-none">
                     <div className="flex items-center justify-between">
                       <span>Période :</span>
-                      <span className="text-white">12/11 - 12/12</span>
+                      <span className="text-white">
+                        {new Date(challenge.start_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                        {challenge.end_at ? ` - ${new Date(challenge.end_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}` : " - Illimité"}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Mode :</span>
@@ -151,27 +175,101 @@ export default function ChallengesPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 mt-auto border-t border-white/5 pt-4 pointer-events-none">
-                  <div className="flex -space-x-1.5">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="w-6 h-6 rounded-full bg-[#333] border border-[#1a1a1a] flex items-center justify-center text-[9px] text-white">
-                        <User size={12} />
+                <div className="mt-auto">
+                  <div
+                    className="flex justify-between items-center pt-4 border-t border-white/5 relative z-20 cursor-pointer group/players"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const newExpanded = new Set(expandedChallenges);
+                      if (newExpanded.has(challenge.id)) {
+                        newExpanded.delete(challenge.id);
+                      } else {
+                        newExpanded.add(challenge.id);
+                      }
+                      setExpandedChallenges(newExpanded);
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex -space-x-2">
+                        {challenge.players?.slice(0, 3).map((p, i) => (
+                          <div key={p.id} className="w-7 h-7 rounded-full border-2 border-[#1a1a1a] bg-[#2a2a2a] overflow-hidden flex-shrink-0 relative" style={{ zIndex: 3 - i }}>
+                            {p.profile_icon_id ? (
+                              <img
+                                src={`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${p.profile_icon_id}.png`}
+                                alt={p.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-[#333]">
+                                <User size={12} className="text-white/30" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {(!challenge.players || challenge.players.length === 0) && (
+                          <div className="w-7 h-7 rounded-full border-2 border-[#1a1a1a] bg-[#2a2a2a] flex items-center justify-center">
+                            <User size={12} className="text-white/20" />
+                          </div>
+                        )}
                       </div>
-                    ))}
-                    <div className="w-6 h-6 rounded-full bg-[#222] border border-[#1a1a1a] flex items-center justify-center text-[9px] text-white">
-                      +
+                      <span className="text-xs text-white/40 group-hover/players:text-[var(--color-green-start)] transition-colors">
+                        {challenge.players?.length > 3 ? `+${challenge.players.length - 3} joueurs` :
+                          challenge.players?.length > 0 ? `${challenge.players.length} joueur${challenge.players.length > 1 ? 's' : ''}` :
+                            "Aucun joueur"}
+                      </span>
                     </div>
                   </div>
 
-                  <Button variant="ghost" size="sm" className="text-white/50 group-hover:text-white rounded-full px-4 text-xs border border-white/10 bg-transparent group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300">
-                    Ouvrir
-                  </Button>
+                  {/* Expanded Player List */}
+                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedChallenges.has(challenge.id) ? 'max-h-60 mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="space-y-2 py-2 border-t border-white/5">
+                      {challenge.players?.map((p) => (
+                        <div key={p.id} className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                          <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0">
+                            {p.profile_icon_id ? (
+                              <img
+                                src={`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${p.profile_icon_id}.png`}
+                                alt={p.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-[#333]">
+                                <User size={10} className="text-white/30" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-sm text-white/80 font-medium truncate">
+                            {getDisplayNameFromRiotId(p.name)}
+                          </span>
+                        </div>
+                      ))}
+                      {challenge.players?.length > 0 && (
+                        <div className="pt-2">
+                          <Link href={`/challenges/${challenge.id}`} className="block">
+                            <Button variant="ghost" size="sm" className="w-full text-xs text-white/40 hover:text-white hover:bg-white/5 h-8">
+                              Voir le classement complet
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Link href={`/challenges/${challenge.id}`} className="relative z-20">
+                      <Button variant="ghost" size="sm" className="text-white/50 hover:text-white rounded-full px-4 text-xs border border-white/10 bg-transparent hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+                        Ouvrir
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </Card>
             </div>
-          ))}
-        </div>
+          ))
+          }
+        </div >
       )}
-    </div>
+    </div >
   );
 }

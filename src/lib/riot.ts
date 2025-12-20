@@ -67,7 +67,7 @@ export async function getPuuidBySummoner(region: Region, summonerName: string) {
     throw new Error(`Riot summoner lookup failed: ${res.status} ${txt}`);
   }
   const data = await res.json();
-  return { puuid: data.puuid as string, name: data.name as string };
+  return { puuid: data.puuid as string, name: data.name as string, profileIconId: data.profileIconId as number };
 }
 
 // Fallback B: Account-v1 via Riot ID (gameName#tagLine)
@@ -77,8 +77,8 @@ export async function getPuuidByRiotId(region: Region, gameName: string, tagLine
     continent === "ASIA"
       ? "asia"
       : continent === "AMERICAS"
-      ? "americas"
-      : "europe";
+        ? "americas"
+        : "europe";
 
   const url = `https://${base}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(
     gameName
@@ -98,6 +98,22 @@ export async function getPuuidByRiotId(region: Region, gameName: string, tagLine
   }
   const data = await res.json();
   return { puuid: data.puuid as string, gameName: data.gameName as string, tagLine: data.tagLine as string };
+}
+
+// Nouvelle fonction pour récupérer profileIconId via PUUID
+export async function getSummonerByPuuid(region: Region, puuid: string) {
+  const platform = platformFromRegion(region);
+  const url = `https://${platform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(
+    puuid
+  )}`;
+  const res = await fetch(url, { headers: riotHeaders(), cache: "no-store" });
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    const txt = await res.text();
+    throw new Error(`Riot summoner by puuid failed: ${res.status} ${txt}`);
+  }
+  const data = await res.json();
+  return { puuid: data.puuid as string, name: data.name as string, profileIconId: data.profileIconId as number };
 }
 
 // (on garde fetchRankedSoloSnapshot + ordinalFromRank identiques)
@@ -123,8 +139,8 @@ export async function fetchRankedSoloSnapshot(region: Region, puuid: string) {
 }
 
 const TIER_LIST = [
-  "IRON","BRONZE","SILVER","GOLD","PLATINUM","EMERALD","DIAMOND",
-  "MASTER","GRANDMASTER","CHALLENGER",
+  "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND",
+  "MASTER", "GRANDMASTER", "CHALLENGER",
 ] as const;
 const DIV_VAL: Record<string, number> = { IV: 0, III: 1, II: 2, I: 3 };
 
@@ -134,12 +150,12 @@ export function ordinalFromRank(tier?: string | null, division?: string | null, 
   const t = String(tier).toUpperCase();
   const ti = TIER_LIST.indexOf(t as any);
   if (ti < 0) return 0;
-  
+
   const lpClamped = Math.max(0, Math.min(Number(lp ?? 0), t === "CHALLENGER" ? 3000 : 1000)); // LP plus élevé pour Challenger
-  
+
   // 🔧 FIX: Gestion correcte des tiers sans divisions
-  const withDiv = ["IRON","BRONZE","SILVER","GOLD","PLATINUM","EMERALD","DIAMOND"].includes(t);
-  
+  const withDiv = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND"].includes(t);
+
   if (withDiv) {
     // Tiers avec divisions (Iron à Diamond)
     const TIER_STEPS = 5; // 4 divisions + LP
@@ -149,7 +165,7 @@ export function ordinalFromRank(tier?: string | null, division?: string | null, 
     // Tiers sans divisions (Master, Grandmaster, Challenger)
     const TIER_STEPS = 5;
     const baseValue = ti * TIER_STEPS + 4; // +4 car équivalent à Division I
-    
+
     // 🔧 FIX: LP significatif pour Master+
     if (t === "CHALLENGER") {
       return baseValue + lpClamped / 3000; // 0-1 basé sur 3000 LP max

@@ -1,17 +1,11 @@
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; 
-// Using inline avatar for now
-
-// Actually I don't have Avatar component in current project. I should use simple div or create one.
-// The reference used @/components/ui/avatar. I should probably just implement it inline or create the component.
-// For now inline to save steps or use a simple placeholder.
-// I will implement a basic replacement for Avatar inline.
+const DDRAGON_VERSION = "14.24.1";
 
 const leaderboardData = [
-    { position: 1, player: { name: "Caps", team: "G2 Esport" }, initialRank: "Challenger 1403 LP", wins: 0, losses: 0, lpGained: 0, currentRank: "Challenger 1403 LP" },
-    { position: 1, player: { name: "Caps", team: "G2 Esport" }, initialRank: "Challenger 1403 LP", wins: 0, losses: 0, lpGained: 0, currentRank: "Challenger 1403 LP" },
-    { position: 1, player: { name: "Caps", team: "G2 Esport" }, initialRank: "Challenger 1403 LP", wins: 0, losses: 0, lpGained: 0, currentRank: "Challenger 1403 LP" },
-    { position: 1, player: { name: "Caps", team: "G2 Esport" }, initialRank: "Challenger 1403 LP", wins: 0, losses: 0, lpGained: 0, currentRank: "Challenger 1403 LP" },
-    { position: 1, player: { name: "Caps", team: "G2 Esport" }, initialRank: "Challenger 1403 LP", wins: 0, losses: 0, lpGained: 0, currentRank: "Challenger 1403 LP" },
+    { position: 1, player: { displayName: "Canna", team: "Karmine Corp", profileIconId: 6632 }, initialRank: "Challenger 1000 LP", wins: 15, losses: 5, lpGained: 250, currentRank: "Challenger 1250 LP" },
+    { position: 2, player: { displayName: "Caliste", team: "Karmine Corp", profileIconId: 588 }, initialRank: "Challenger 900 LP", wins: 12, losses: 4, lpGained: 180, currentRank: "Challenger 1080 LP" },
+    { position: 3, player: { displayName: "BrokenBlade", team: "G2 Esports", profileIconId: 6335 }, initialRank: "Challenger 1100 LP", wins: 10, losses: 8, lpGained: 50, currentRank: "Challenger 1150 LP" },
+    { position: 4, player: { displayName: "Supa", team: "Movistar KOI", profileIconId: 4402 }, initialRank: "Challenger 850 LP", wins: 14, losses: 16, lpGained: -15, currentRank: "Challenger 835 LP" },
+    { position: 5, player: { displayName: "Caps", team: "G2 Esports", profileIconId: 512 }, initialRank: "Challenger 1400 LP", wins: 8, losses: 8, lpGained: 0, currentRank: "Challenger 1400 LP" },
 ];
 
 export function LeaderboardPreview() {
@@ -26,11 +20,11 @@ export function LeaderboardPreview() {
                 <div className="grid grid-cols-[50px_1fr_1fr] md:grid-cols-[60px_2fr_1.5fr_1fr_1fr_1fr_1.5fr] items-center gap-4 px-4 md:px-6 py-3 bg-gradient-to-b from-[var(--color-green-start)] to-[var(--color-green-end)] border-b border-white/5">
                     <div className="text-sm text-center font-normal text-white/90">#</div>
                     <div className="text-sm font-normal text-white/90">Joueur</div>
-                    <div className="hidden md:block text-sm font-normal text-white/90">Rank initial</div>
+                    <div className="text-sm font-normal text-white/90">Rank</div>
                     <div className="hidden md:block text-sm text-center font-normal text-white/90">Victoires</div>
                     <div className="hidden md:block text-sm text-center font-normal text-white/90">Défaites</div>
                     <div className="hidden md:block text-sm text-center font-normal text-white/90">Lp gagnés</div>
-                    <div className="text-sm font-normal text-white/90 text-right md:text-left">Rank</div>
+                    <div className="hidden md:block text-sm font-normal text-white/90 text-right">Rank initial</div>
                 </div>
 
                 {/* Rows with Fade Mask */}
@@ -50,12 +44,18 @@ export function LeaderboardPreview() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                {/* Avatar Placeholder */}
-                                <div className="w-8 h-8 md:w-10 md:h-10 border border-white/10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white/50 text-xs shrink-0">
+                                {/* Profile Icon */}
+                                <div className="w-8 h-8 md:w-10 md:h-10 border border-white/10 rounded-full bg-[#2a2a2a] overflow-hidden shrink-0">
+                                    <img
+                                        src={`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${entry.player.profileIconId}.png`}
+                                        alt={entry.player.displayName}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <div className="text-white text-sm font-medium truncate">
-                                        {entry.player.name}
+                                        {entry.player.displayName}
                                     </div>
                                     <div className="text-white/40 text-[10px] truncate">
                                         {entry.player.team}
@@ -63,8 +63,8 @@ export function LeaderboardPreview() {
                                 </div>
                             </div>
 
-                            <div className="hidden md:block text-white/70 text-sm font-normal">
-                                {entry.initialRank}
+                            <div className="text-white/70 text-sm font-normal truncate">
+                                {entry.currentRank}
                             </div>
                             <div className="hidden md:block text-white/70 text-sm font-normal text-center">
                                 {entry.wins}
@@ -72,11 +72,11 @@ export function LeaderboardPreview() {
                             <div className="hidden md:block text-white/70 text-sm font-normal text-center">
                                 {entry.losses}
                             </div>
-                            <div className="hidden md:block text-white/70 text-sm font-normal text-center">
-                                {entry.lpGained}
+                            <div className={`hidden md:block text-sm font-medium text-center ${entry.lpGained > 0 ? 'text-green-400' : entry.lpGained < 0 ? 'text-red-400' : 'text-white/70'}`}>
+                                {entry.lpGained > 0 ? `+${entry.lpGained}` : entry.lpGained}
                             </div>
-                            <div className="text-white/70 text-sm font-normal text-right md:text-left truncate">
-                                {entry.currentRank}
+                            <div className="hidden md:block text-white/70 text-sm font-normal text-right truncate">
+                                {entry.initialRank}
                             </div>
                         </div>
                     ))}

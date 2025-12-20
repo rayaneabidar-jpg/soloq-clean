@@ -9,7 +9,14 @@ export async function GET(req: Request) {
   try {
     const { data: challenges, error } = await supabaseAdmin
       .from("challenges")
-      .select("*")
+      .select(`
+        *,
+        players (
+          id,
+          name,
+          profile_icon_id
+        )
+      `)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -69,6 +76,25 @@ export async function POST(req: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    // CRITICAL FIX: Add owner to challenge_members
+    const { error: memberError } = await supabaseAdmin
+      .from("challenge_members")
+      .insert({
+        challenge_id: data.id,
+        user_id: user.id,
+        role: "owner",
+      });
+
+    if (memberError) {
+      console.error("Failed to add owner to challenge_members:", memberError);
+      // Optional: Try to cleanup challenge? Or just return error.
+      // returning error 500 but challenge was created.
+      return NextResponse.json(
+        { error: "Challenge created but failed to set owner permissions." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, challengeId: data.id }, { status: 201 });

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin, getUserFromAuthHeader } from "@/lib/supabase-server";
-import { getPuuidBySummoner, getPuuidByRiotId } from "@/lib/riot";
+import { getPuuidBySummoner, getPuuidByRiotId, getSummonerByPuuid } from "@/lib/riot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const RegionEnum = z.enum([
-  "EUW","EUNE","NA","KR","JP","BR","LAN","LAS","OCE","TR","RU",
+  "EUW", "EUNE", "NA", "KR", "JP", "BR", "LAN", "LAS", "OCE", "TR", "RU",
 ]);
 
 // On accepte 3 variantes:
@@ -41,7 +41,7 @@ export async function POST(
       .eq("user_id", user.id)
       .maybeSingle();
     if (memErr) return NextResponse.json({ error: memErr.message }, { status: 400 });
-    if (!membership || !["owner","admin"].includes(membership.role)) {
+    if (!membership || !["owner", "admin"].includes(membership.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -56,25 +56,41 @@ export async function POST(
       try {
         let puuid: string | null = null;
         let displayName: string = "";
+        let profileIconId: number | null = null;
 
         if ("puuid" in p) {
           // C) PUUID direct
           puuid = p.puuid;
-          displayName = p.puuid.slice(0, 12) + "…";
+
+          // Récupérer les infos summoner pour le nom et l'icône
+          const sum = await getSummonerByPuuid(p.region, puuid);
+          if (sum) {
+            displayName = sum.name;
+            profileIconId = sum.profileIconId;
+          } else {
+            displayName = p.puuid.slice(0, 12) + "…";
+          }
         } else if ("riotId" in p) {
-          // B) Riot ID: "GameName#TagLine" via Account-v1 (continental)
+          // B) Riot ID: "GameName#TagLine" via Account-v1
           const [gameName, tagLine] = p.riotId.split("#");
           if (!gameName || !tagLine) throw new Error("Invalid Riot ID format. Use GameName#TagLine");
           const acc = await getPuuidByRiotId(p.region, gameName.trim(), tagLine.trim());
           if (!acc?.puuid) throw new Error("Riot ID not found");
           puuid = acc.puuid;
           displayName = `${acc.gameName}#${acc.tagLine}`;
+
+          // Récupérer l'icône via Summoner API
+          const sum = await getSummonerByPuuid(p.region, puuid);
+          if (sum) {
+            profileIconId = sum.profileIconId;
+          }
         } else if ("summonerName" in p) {
-          // A) Summoner name (peut échouer si Summoner v4 renvoie 403 chez toi)
+          // A) Summoner name
           const res = await getPuuidBySummoner(p.region, p.summonerName);
           if (!res?.puuid) throw new Error("Summoner not found");
           puuid = res.puuid;
           displayName = res.name;
+          profileIconId = res.profileIconId; // Déjà dispo ici
         }
 
         if (!puuid) throw new Error("Unable to resolve PUUID");
@@ -86,6 +102,7 @@ export async function POST(
           name: displayName,
           summoner_name: displayName,
           active: true,
+          profile_icon_id: profileIconId // Ajouté
         };
 
         const { data, error } = await supabaseAdmin

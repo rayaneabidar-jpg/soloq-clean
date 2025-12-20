@@ -24,7 +24,7 @@ export async function GET(
 
     const { data: players, error: playErr } = await supabaseAdmin
       .from("players")
-      .select("id, puuid, name, region, team, active")
+      .select("id, puuid, name, region, team, active, profile_icon_id")
       .eq("challenge_id", id);
 
     if (playErr) {
@@ -109,6 +109,7 @@ export async function GET(
           mainRank,
           initialRank: initialSnap ? `${initialSnap.tier} ${initialSnap.division}` : null,
           finalRank: finalSnap ? `${finalSnap.tier} ${finalSnap.division}` : null,
+          profileIconId: player.profile_icon_id || null, // Included
         });
       } catch (e: any) {
         console.error(`Error for player ${player.id}:`, e.message);

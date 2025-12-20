@@ -27,6 +27,49 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const { name } = await req.json();
+
+    if (!name || typeof name !== "string" || name.trim().length < 3) {
+      return NextResponse.json({ error: "Name must be at least 3 chars" }, { status: 400 });
+    }
+
+    const user = await getUserFromAuthHeader(req);
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { data: membership } = await supabaseAdmin
+      .from("challenge_members")
+      .select("role")
+      .eq("challenge_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!membership || !["owner", "admin"].includes(membership.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("challenges")
+      .update({ name: name.trim() })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ challenge: data });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
