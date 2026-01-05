@@ -51,10 +51,14 @@ export default function ChallengesPage() {
     async function fetchData() {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
         setUser(sessionData.session?.user || null);
 
         const res = await fetch("/api/challenges", {
           cache: "no-store",
+          headers: token ? {
+            Authorization: `Bearer ${token}`,
+          } : {},
         });
         const json = await res.json();
         setChallenges(json.challenges || []);

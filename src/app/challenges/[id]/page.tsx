@@ -22,8 +22,14 @@ export default function ChallengePage() {
   useEffect(() => {
     async function fetchChallenge() {
       try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+
         const res = await fetch(`/api/challenges/${id}`, {
           cache: "no-store",
+          headers: token ? {
+            Authorization: `Bearer ${token}`,
+          } : {},
         });
         const json = await res.json();
         setChallenge(json.challenge || null);

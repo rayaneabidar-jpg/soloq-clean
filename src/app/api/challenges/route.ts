@@ -7,6 +7,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
+    const user = await getUserFromAuthHeader(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data: challenges, error } = await supabaseAdmin
       .from("challenges")
       .select(`
@@ -17,6 +22,7 @@ export async function GET(req: Request) {
           profile_icon_id
         )
       `)
+      .eq("owner_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {

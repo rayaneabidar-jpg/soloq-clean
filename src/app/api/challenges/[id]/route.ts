@@ -11,14 +11,20 @@ export async function GET(
   try {
     const { id } = await context.params;
 
+    const user = await getUserFromAuthHeader(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data: challenge, error } = await supabaseAdmin
       .from("challenges")
       .select("*")
       .eq("id", id)
+      .eq("owner_id", user.id)
       .single();
 
     if (error || !challenge) {
-      return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
+      return NextResponse.json({ error: "Challenge not found or access denied" }, { status: 404 });
     }
 
     return NextResponse.json({ challenge });
